@@ -1,3 +1,6 @@
 # HSCA_Project
 
-## Ideally to create a cache pipleining which has three levels with set-associative mapping, along with LRU
+## Ideally to create a cache pipleining which has 
+### -Three levels 
+### -Set-associative mapping
+### -Along with LRU
