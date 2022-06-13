@@ -1,23 +1,51 @@
-from random import random
+from random import *
 import time
 import threading
 
 # we are using 4-way set associative mapping
 
+
+def decimalToBinary(n):
+    st = "{0:b}".format(int(n))
+    return st
+
+
 mainMemory = ["Data no. " + str(i + 1)
               for i in range(1024)]  # data of main memory
-
-cacheMemory = []  # 4 sets and each set has 4 blocks
-
-# now the cache is filled
-for i in range(4):
-    tempdict = {}
-    start = i
+mainMemory2 = []
+for i in range(256):
+    l = []
     for j in range(4):
-        tempdict[start] = mainMemory[start]
-        start += 4
-    cacheMemory.append(tempdict)
+        st = str(i*4 + j)
+        l.append(st)
+    mainMemory2.append(l)
+# print(mainMemory2)
 
+cacheMemory = [[], [], [], []]  # 4 sets and each set has 4 blocks
+print(cacheMemory)
+# now the cache is filled random data
+totFilled = 0
+while(totFilled < 16):
+    mainaddr = randint(0, 255)
+    # print(mainaddr)
+    tempdict = {}
+    # start = i*10
+    # l = []
+    addrTemp = decimalToBinary((mainaddr))
+    addrTemp = addrTemp.zfill(8)
+    cacheTag = '1' + addrTemp[0:6]
+    print('adsfasfasdfwefwe', mainaddr, cacheTag)
+    print('adsfadsfds', addrTemp[6:8])
+    # perfect
+    cacheSet = int(addrTemp[6:8], 2)
+    # time.sleep(1)
+    if(len(cacheMemory[cacheSet]) == 4):
+        continue
+    cacheMemory[cacheSet].append({cacheTag: mainMemory2[mainaddr]})
+    totFilled += 1
+    print(totFilled)
+
+print(cacheMemory)
 
 n_instr = int(input("Enter the number of instructions you want to enter: "))
 addresses = []
@@ -35,15 +63,32 @@ def check_valid_bit(instr_no, address, cycle_no, startTime):
 
 
 def get_data_from_cache(instr_no, address, cycle_no, startTime):
-    set_no = (address // 4) % 4
-    tag = address // 16
+    # address = int(address, 16)
+    addrTemp = decimalToBinary((address))
+
+    addrTemp = addrTemp.zfill(10)
+
+    offset = addrTemp[8:10]
+    tag = addrTemp[0:6]
+    set_no = int(addrTemp[6:8], 2)
+    f = 0
+    for i in cacheMemory[set_no]:
+        for j in i:
+            cacheTag = j[1:7]
+            validBit = j[0]
+
+            if(validBit == '1' and tag == cacheTag):
+                f = 1
+                print('HITTTTTTTTTTT')
+    if(f == 0):
+        print('MISS!!')
     # check all keys of cacheMemory[set_no]
-    for key in cacheMemory[set_no]:
-        if((key // 16) == tag):
-            time.sleep(1)
-            print("Instruction", instr_no, ": Data in cache is: " +
-                  str(cacheMemory[set_no][key]), ". Current time is (in seconds): ", time.time() - startTime)
-            break
+    # for key in cacheMemory[set_no]:
+    #     if((key // 16) == tag):
+    #         time.sleep(1)
+    #         print("Instruction", instr_no, ": Data in cache is: " +
+    #               str(cacheMemory[set_no][key]), ". Current time is (in seconds): ", time.time() - startTime)
+    #         break
 
 
 def data_to_cpu(instr_no, cycle_no, startTime):
